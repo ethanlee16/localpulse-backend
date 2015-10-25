@@ -1,0 +1,26 @@
+{
+  "name": "pulse-app-backend",
+  "version": "1.0.0",
+  "description": "Backend for pulse",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TimothyGu/pulse-app-backend.git"
+  },
+  "author": "Timothy Gu <timothygu99@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TimothyGu/pulse-app-backend/issues"
+  },
+  "homepage": "https://github.com/TimothyGu/pulse-app-backend#readme",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "express": "^4.13.3",
+    "mime-types": "^2.1.7",
+    "multer": "^1.1.0",
+    "parse": "^1.6.7"
+  }
+}
