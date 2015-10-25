@@ -30,6 +30,12 @@ Parse.initialize(config.parseAppID, config.parseKey);
 
 app.use(express.static(__dirname + '/public'))
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 app.post('/api/1.0/upload', singleUpload, function (req, res) {
   var file = req.file;
   var entry = new Entry();
