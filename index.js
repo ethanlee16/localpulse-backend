@@ -140,6 +140,15 @@ app.get('/api/1.0/getAll', function (req, res) {
   });
 });
 
+app.get('/api/1.0/getAllJSON', function (req, res) {
+  var out = [];
+  Promise.resolve(new Parse.Query(Entry).each(function (entry) {
+    out.push(entry)
+  })).then(function () {
+    res.send(out);
+  });
+});
+
 app.get('/api/1.0/get/:id', function (req, res) {
   Promise.resolve(new Parse.Query(Entry).get(req.params.id)).then(function (entry) {
     var obj = {
