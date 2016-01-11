@@ -50,7 +50,7 @@ app.post('/api/1.0/upload', singleUpload, function (req, res) {
       response: 200,
       text: 'OK'
     });
-  }).catch(function (e) {
+  }).catch(function (err) {
     if (err) {
       console.error(err.stack || err.message || err);
     } else {
