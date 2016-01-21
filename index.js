@@ -25,6 +25,7 @@ var singleUpload = upload.single('picture');
 var jsonParser = bodyParser.json();
 
 var Entry = Parse.Object.extend("Entry");
+var Comment = Parse.Object.extend("Comment");
 
 Parse.initialize(config.parseAppID, config.parseKey);
 
@@ -166,6 +167,57 @@ app.get('/api/1.0/get/:id', function (req, res) {
       response: 404,
       text: 'Not found'
     });
+  }).catch(function (err) {
+    if (err) {
+      console.error(err.stack || err.message || err);
+    } else {
+      console.trace('500')
+    }
+    res.status(500).send({
+      response: 500,
+      text: 'Internal server error'
+    });
+  });
+});
+
+app.post('/api/1.0/comment/:id', jsonParser, function (req, res) {
+  var comment = new Comment();
+
+  Promise.resolve(comment.save({
+    data: req.body.data,
+    uuid: req.body.uuid,
+    target: req.params.id,
+  })).then(function () {
+    res.send({
+      response: 200,
+      text: 'OK',
+    });
+  }).catch(function (err) {
+    if (err) {
+      console.error(err.stack || err.message || err);
+    } else {
+      console.trace('500')
+    }
+    res.status(500).send({
+      response: 500,
+      text: 'Internal server error'
+    });
+  });
+});
+
+app.get('/api/1.0/getComments/:id', function (req, res) {
+  var query = new Parse.Query(Comment)
+    .equalTo('target', req.params.id);
+
+  Promise.resolve(query.find()).then(function (results) {
+    if (!results || !results.length) {
+      return res.status(404).send({
+        response: 404,
+        text: 'Not found',
+      });
+    }
+
+    return res.send(results);
   }).catch(function (err) {
     if (err) {
       console.error(err.stack || err.message || err);
