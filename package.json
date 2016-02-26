@@ -21,6 +21,7 @@
     "csv-stringify": "0.0.8",
     "express": "^4.13.3",
     "mime-types": "^2.1.7",
+    "morgan": "^1.6.1",
     "multer": "^1.1.0",
     "parse": "^1.6.7",
     "promise": "^7.0.4"

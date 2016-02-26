@@ -7,8 +7,6 @@ var bodyParser = require('body-parser');
 var Parse = require('parse/node');
 var stringify = require('csv-stringify');
 
-var config = require('./config');
-
 var app = express();
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -27,7 +25,7 @@ var jsonParser = bodyParser.json();
 var Entry = Parse.Object.extend("Entry");
 var Comment = Parse.Object.extend("Comment");
 
-Parse.initialize(config.parseAppID, config.parseKey);
+Parse.initialize(process.env.parseAppID, process.env.parseKey);
 
 app.use(express.static(__dirname + '/public'))
 
