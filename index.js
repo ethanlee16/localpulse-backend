@@ -1,4 +1,5 @@
 // Promise returned by Parse sucks.
+var morgan = require('morgan');
 var Promise = require('promise');
 var express = require('express');
 var multer = require('multer');
@@ -24,16 +25,19 @@ var upload = multer({ storage });
 var singleUpload = upload.single('picture');
 var jsonParser = bodyParser.json();
 
-var Entry = Parse.Object.extend("Entry");
-var Comment = Parse.Object.extend("Comment");
+var Entry = Parse.Object.extend('Entry');
+var Comment = Parse.Object.extend('Comment');
+var User = Parse.Object.extend('User');
 
 Parse.initialize(config.parseAppID, config.parseKey);
+
+app.use(morgan('combined'));
 
 app.use(express.static(__dirname + '/public'))
 
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
 
@@ -41,8 +45,7 @@ app.post('/api/1.0/upload', singleUpload, function (req, res) {
   var file = req.file;
   var entry = new Entry();
   Promise.resolve(entry.save({
-    upvotes: 0,
-    downvotes: 0,
+    votes: 0,
     pictures: [ 'uploads/' + file.filename ],
     description: req.body.description,
     location: new Parse.GeoPoint(+req.body.latitude, +req.body.longitude)
@@ -183,11 +186,14 @@ app.get('/api/1.0/get/:id', function (req, res) {
 app.post('/api/1.0/comment/:id', jsonParser, function (req, res) {
   var comment = new Comment();
 
-  Promise.resolve(comment.save({
-    data: req.body.data,
-    uuid: req.body.uuid,
-    target: req.params.id,
-  })).then(function () {
+  Promise.all([
+    Promise.resolve(comment.save({
+      data: req.body.data,
+      name: req.body.uuid,
+      target: req.params.id,
+      admin: req.body.uuid === 'admin'
+    })),
+  ]).then(function () {
     res.send({
       response: 200,
       text: 'OK',
