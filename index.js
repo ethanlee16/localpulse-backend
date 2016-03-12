@@ -260,6 +260,10 @@ app.get('/api/1.0/getComments/:id', function (req, res) {
   });
 });
 
+app.get('/download-all', function(req, res) {
+  res.redirect("https://drive.google.com/uc?export=download&confirm=9joP&id=0B90wh56b4gO9dGFncmdrbFdQczg");
+});
+
 app.listen(8083, '0.0.0.0', function () {
   console.log('listening on 8083');
 });
