@@ -99,6 +99,29 @@ function postVoteRoute (increment) {
 app.post('/api/1.0/upvote/:id',   jsonParser, postVoteRoute(1));
 app.post('/api/1.0/downvote/:id', jsonParser, postVoteRoute(-1));
 
+app.post('/api/1.1/vote/:id', jsonParser, function (req, res) {
+  res.set('Content-Type', 'text/plain');
+  var votes = req.body.votes;
+
+  if (votes > 10 || votes < -10) res.status(400).send('');
+  Promise.resolve(new Parse.Query(Entry).get(req.params.id))
+    .then(function (entry) {
+      entry.increment('votes', votes);
+      return Promise.resolve(entry.save()).then(function () {
+        res.send('');
+      }).catch(function (err) {
+        if (err) {
+          console.error(err.stack || err.message || err);
+        } else {
+          console.trace('500')
+        }
+        res.status(500).send('');
+      });
+    }, function (err) {
+      res.status(404).send('');
+    });
+});
+
 app.get('/api/1.0/votes/:id', function (req, res) {
   res.set('Content-Type', 'text/plain');
   Promise.resolve(new Parse.Query(Entry).get(req.params.id))
