@@ -31,7 +31,7 @@ var User = Parse.Object.extend('User');
 
 Parse.initialize(config.parseAppID, config.parseKey);
 
-app.use(morgan('combined'));
+//app.use(morgan('combined'));
 
 app.use(express.static(__dirname + '/public'))
 
@@ -176,18 +176,18 @@ app.get('/api/1.0/getAllJSON', function (req, res) {
   });
 });
 
+app.get('/api/1.2/getAllJSON', function (req, res) {
+  var out = [];
+  Promise.resolve(new Parse.Query(Entry).each(function (entry) {
+    out.push(getJsonFromEntry(entry));
+  })).then(function () {
+    res.send(out);
+  });
+});
+
 app.get('/api/1.0/get/:id', function (req, res) {
   Promise.resolve(new Parse.Query(Entry).get(req.params.id)).then(function (entry) {
-    var obj = {
-      objectId: entry.id,
-      description: entry.get('description'),
-      location: entry.get('location'),
-      picture: entry.get('pictures')[0],
-      votes: entry.get('votes'),
-      createdAt: entry.createdAt,
-      updatedAt: entry.updatedAt
-    };
-    res.send(obj);
+    res.send(getJsonFromEntry(obj));
   }, function (err) {
     res.status(404).send({
       response: 404,
@@ -206,14 +206,14 @@ app.get('/api/1.0/get/:id', function (req, res) {
   });
 });
 
-app.post('/api/1.0/comment/:id', jsonParser, function (req, res) {
+app.post('/api/1.0/comment/:target', jsonParser, function (req, res) {
   var comment = new Comment();
 
   Promise.all([
     Promise.resolve(comment.save({
       data: req.body.data,
-      name: req.body.uuid,
-      target: req.params.id,
+      uuid: req.body.uuid,
+      target: req.params.target,
       admin: req.body.uuid === 'admin'
     })),
   ]).then(function () {
@@ -234,9 +234,10 @@ app.post('/api/1.0/comment/:id', jsonParser, function (req, res) {
   });
 });
 
-app.get('/api/1.0/getComments/:id', function (req, res) {
+app.get('/api/1.0/getComments/:target', function (req, res) {
   var query = new Parse.Query(Comment)
-    .equalTo('target', req.params.id);
+    .equalTo('target', req.params.target)
+    .ascending('createdAt');
 
   Promise.resolve(query.find()).then(function (results) {
     if (!results || !results.length) {
@@ -260,10 +261,40 @@ app.get('/api/1.0/getComments/:id', function (req, res) {
   });
 });
 
-app.get('/download-all', function(req, res) {
-  res.redirect("https://drive.google.com/uc?export=download&confirm=9joP&id=0B90wh56b4gO9dGFncmdrbFdQczg");
+app.get('/api/1.2/getComments/:target', function (req, res) {
+  var query = new Parse.Query(Comment)
+    .equalTo('target', req.params.target)
+    .ascending('createdAt');
+
+  Promise.resolve(query.find()).then(function (results) {
+    if (!results) results = [];
+
+    return res.send(results);
+  }).catch(function (err) {
+    if (err) {
+      console.error(err.stack || err.message || err);
+    } else {
+      console.trace('500')
+    }
+    res.status(500).send({
+      response: 500,
+      text: 'Internal server error'
+    });
+  });
 });
 
 app.listen(8083, '0.0.0.0', function () {
   console.log('listening on 8083');
 });
+
+function getJsonFromEntry(entry) {
+  return {
+    objectId: entry.id,
+    description: entry.get('description'),
+    location: entry.get('location'),
+    picture: entry.get('pictures')[0],
+    votes: entry.get('votes'),
+    createdAt: entry.createdAt,
+    updatedAt: entry.updatedAt
+  };
+}
