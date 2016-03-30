@@ -1,4 +1,5 @@
 // Promise returned by Parse sucks.
+var request = require('then-request');
 var morgan = require('morgan');
 var Promise = require('promise');
 var express = require('express');
@@ -7,6 +8,8 @@ var mime = require('mime-types');
 var bodyParser = require('body-parser');
 var Parse = require('parse/node');
 var stringify = require('csv-stringify');
+var url = require('url');
+var parseXml = require('xml2js').parseString;
 
 var config = require('./config');
 
@@ -280,6 +283,36 @@ app.get('/api/1.2/getComments/:target', function (req, res) {
       response: 500,
       text: 'Internal server error'
     });
+  });
+});
+
+app.get('/api/1.3/getTags', function (req, res) {
+  var src = req.query.q;
+  if (!src) {
+    return res.send([]);
+  }
+
+  var urlObj = url.parse('https://api.datamarket.azure.com/data.ashx/amla/text-analytics/v1/GetKeyPhrases');
+  urlObj.query = { Text: src };
+  console.log(url.format(urlObj))
+  request('GET', url.format(urlObj), {
+    headers: {
+      Authorization: config.azureAuth,
+    },
+  }).then(function (xml) {
+    console.log(xml);
+    return new Promise(function (resolve, reject) {
+      parseXml(xml, function (err, obj) {
+        if (err) return reject(err);
+        resolve(obj);
+        console.log(obj);
+      });
+    });
+  }).then(function (xmlObj) {
+    res.send(xmlObj['d:GetKeyPhrases']['d:KeyPhrases'][0]['d:comment']);
+  }).catch(function (err) {
+    console.error(err.stack);
+    res.send([]);
   });
 });
 
