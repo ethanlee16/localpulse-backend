@@ -1,4 +1,3 @@
-// Promise returned by Parse sucks.
 var request = require('then-request');
 var morgan = require('morgan');
 var Promise = require('promise');
@@ -34,7 +33,7 @@ var User = Parse.Object.extend('User');
 
 Parse.initialize(config.parseAppID, config.parseKey);
 
-//app.use(morgan('combined'));
+app.use(morgan('combined'));
 
 app.use(express.static(__dirname + '/public'))
 
