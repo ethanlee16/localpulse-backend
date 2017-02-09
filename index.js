@@ -313,9 +313,7 @@ app.get('/api/1.3/getTags', function (req, res) {
   });
 });
 
-app.listen(8083, '0.0.0.0', function () {
-  console.log('listening on 8083');
-});
+app.listen(process.env.PORT);
 
 function getJsonFromEntry(entry) {
   return {
