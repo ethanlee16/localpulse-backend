@@ -1,2 +1,2 @@
-# pulse-app-backend
-Backend for pulse
+# localpulse-backend
+Backend for Localpulse.
